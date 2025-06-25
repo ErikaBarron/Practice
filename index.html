@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cyberminer</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    input, select, button { margin: 0.5rem; padding: 0.4rem; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 0.5rem 0; }
+    .controls { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Cyberminer Search</h1>
+
+  <div class="controls">
+    <input type="text" id="query" placeholder="Enter search keywords..." list="suggestions" />
+    <datalist id="suggestions"></datalist>
+
+    <select id="mode">
+      <option value="or">OR</option>
+      <option value="and">AND</option>
+      <option value="not">NOT</option>
+    </select>
+
+    <label><input type="checkbox" id="case" /> Case Sensitive</label>
+
+    <select id="sort">
+      <option value="az">Sort A-Z</option>
+      <option value="clicks">Most Clicked</option>
+    </select>
+
+    <select id="perPage">
+      <option value="3">3 per page</option>
+      <option value="5">5 per page</option>
+      <option value="10">10 per page</option>
+    </select>
+
+    <button onclick="search()">Search</button>
+  </div>
+
+  <ul id="results"></ul>
+  <div id="pagination"></div>
+
+  <script>
+    const data = [
+      { url: "https://python.org", description: "Python programming language", clicks: 0 },
+      { url: "https://mozilla.org", description: "Firefox browser by Mozilla", clicks: 0 },
+      { url: "https://openai.com", description: "AI research and models", clicks: 0 },
+      { url: "https://example.com", description: "Cyber security best practices", clicks: 0 },
+      { url: "https://linux.org", description: "Linux operating system", clicks: 0 }
+    ];
+
+    let filtered = [];
+    let currentPage = 1;
+
+    function updateSuggestions() {
+      const allWords = new Set();
+      data.forEach(item => item.description.split(/\s+/).forEach(w => allWords.add(w.toLowerCase())));
+      document.getElementById('suggestions').innerHTML =
+        Array.from(allWords).map(w => `<option value="${w}">`).join('');
+    }
+
+    function search() {
+      const input = document.getElementById("query").value.trim();
+      const terms = input.split(/\s+/);
+      const mode = document.getElementById("mode").value;
+      const sort = document.getElementById("sort").value;
+      const caseSensitive = document.getElementById("case").checked;
+
+      filtered = data.filter(item => {
+        const text = caseSensitive ? item.description : item.description.toLowerCase();
+        const keywords = caseSensitive ? terms : terms.map(t => t.toLowerCase());
+
+        if (mode === "or") return keywords.some(k => text.includes(k));
+        if (mode === "and") return keywords.every(k => text.includes(k));
+        if (mode === "not") return keywords.every(k => !text.includes(k));
+      });
+
+      if (sort === "az") {
+        filtered.sort((a, b) => a.description.localeCompare(b.description));
+      } else {
+        filtered.sort((a, b) => b.clicks - a.clicks);
+      }
+
+      currentPage = 1;
+      render();
+    }
+
+    function render() {
+      const perPage = parseInt(document.getElementById("perPage").value);
+      const resultList = document.getElementById("results");
+      const pagination = document.getElementById("pagination");
+      resultList.innerHTML = "";
+      pagination.innerHTML = "";
+
+      const totalPages = Math.ceil(filtered.length / perPage);
+      const start = (currentPage - 1) * perPage;
+      const page = filtered.slice(start, start + perPage);
+
+      page.forEach(item => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = item.url;
+        a.textContent = item.description;
+        a.target = "_blank";
+        a.onclick = () => item.clicks += 1;
+        li.appendChild(a);
+        resultList.appendChild(li);
+      });
+
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.disabled = i === currentPage;
+        btn.onclick = () => { currentPage = i; render(); };
+        pagination.appendChild(btn);
+      }
+    }
+
+    updateSuggestions();
+  </script>
+</body>
+</html>
