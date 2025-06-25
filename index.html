@@ -58,6 +58,11 @@
       margin: 2px;
       background-color: #333;
       border: 1px solid #444;
+
+      /* Hide datalist dropdown arrow in Chrome/Edge */
+input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
     }
   </style>
 </head>
@@ -68,6 +73,8 @@
   <div class="search-section">
     <input type="text" id="query" placeholder="Enter search keywords..." list="suggestions" size="40"/>
     <datalist id="suggestions"></datalist>
+
+    
     
     <br/>
     <select id="mode">
