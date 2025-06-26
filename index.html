@@ -58,11 +58,6 @@
       margin: 2px;
       background-color: #333;
       border: 1px solid #444;
-
-      /* Hide datalist dropdown arrow in Chrome/Edge */
-input::-webkit-calendar-picker-indicator {
-  display: none !important;
-}
     }
   </style>
 </head>
@@ -91,7 +86,9 @@ input::-webkit-calendar-picker-indicator {
       <option value="clicks">Most Clicked</option>
     </select>
 
-    <select id="perPage">
+    <input type="number" id="perPage" value="5" min="1" style="width: 60px;" />
+<label for="perPage">Results per page</label>
+
       <option value="3">3 per page</option>
       <option value="5">5 per page</option>
       <option value="10">10 per page</option>
@@ -149,7 +146,8 @@ input::-webkit-calendar-picker-indicator {
     }
 
     function render() {
-      const perPage = parseInt(document.getElementById("perPage").value);
+let perPage = parseInt(document.getElementById("perPage").value);
+if (isNaN(perPage) || perPage < 1) perPage = 5;
       const resultList = document.getElementById("results");
       const pagination = document.getElementById("pagination");
       resultList.innerHTML = "";
